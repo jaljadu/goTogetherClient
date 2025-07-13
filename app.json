@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "com.barnaviproduction.gotogether",
     "name": "goTogetherClient",
     "slug": "goTogetherClient",
     "version": "1.0.0",
@@ -13,17 +14,37 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.barnaviproduction.gotogether",
+      "supportsTablet": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB-ssWyB19Ujf-ZlbXjrhuoIz66tFl1OOw"
+        }
+      }
     },
     "android": {
+      "package": "com.barnaviproduction.gotogether",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB-ssWyB19Ujf-ZlbXjrhuoIz66tFl1OOw"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "00cd3c93-50df-4d94-a952-dfa4ae79c807"
+      }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }
