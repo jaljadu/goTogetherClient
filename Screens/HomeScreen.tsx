@@ -62,19 +62,7 @@ const [matchedRiders, setMatchedRiders] = useState([
      endCoords: { latitude: 22.6200, longitude: 88.3700 },
   }
 ]);
-type Rider = {
-  name: string;
-  start: string;
-  end: string;
-  time: string;
-  price: number;
-  photo?: string;
-  rating?:number;
-  reviews?:string;
-  startCoords: any,  // example
-  endCoords: any,
 
-};
 const [selectedSeats, setSelectedSeats] = useState<string | number | null>(null);
 const [openSeat, setOpenSeat] = useState<boolean>(false);
 const [selectedDay, setSelectedDay] = useState<string | number | null>(null);
@@ -85,8 +73,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'LocationSea
 const navigation = useNavigation<NavigationProp>();
 const mapRef = useRef<MapView>(null); // 👈 Map reference
 
- const { setSource, setDestination } = useLocationContext();
-const [selectedRide, setSelectedRide] = useState<Rider | null>(null);
+const { setSource, setDestination } = useLocationContext();
+const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
 useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -107,24 +95,28 @@ useEffect(() => {
         setSelectedSeats(3);
       }
       const ride= await axios.get(api.Baseurl + 'rides');
-      
-      const ridedata=ride.data[0] as Ride ;
-      console.log(ridedata);
-      if(ridedata && ridedata.origin?.lat && ridedata.origin.lng 
-        && ridedata.destination?.lat && ridedata.destination.lng
-      ) {
-        const sourcedes=await reverseGeocode(ridedata.origin.lat,ridedata.origin.lng);
-        const Destdes=await reverseGeocode(ridedata.destination.lat,ridedata.destination.lng);
-       
+      if(ride && ride.data) {
+         const ridedata=ride.data[0] as Ride ;
+         console.log(ridedata);
+         if(ridedata && ridedata.sourceLocation?.coordinates && 
+            ridedata.sourceLocation?.coordinates.length>0  
+           && ridedata.destinationLocation?.coordinates
+        ) {
+          const sourcedes=await reverseGeocode(ridedata?.sourceLocation?.coordinates[0].latitude,
+            ridedata.sourceLocation.coordinates[0].longitude);
+          const Destdes=await reverseGeocode(ridedata?.destinationLocation?.coordinates[0].latitude,
+            ridedata?.destinationLocation?.coordinates[0].longitude);
+        
          setSource({
           description:sourcedes,
-          place_id:ridedata?.origin?.address ||''
+          place_id:ridedata?.sourceLocation?.placeId ||''
          });
          setDestination({
           description:Destdes ||'',
-          place_id:ridedata?.destination?.address ||''
+          place_id:ridedata?.destinationLocation?.placeId ||''
          });
-      } 
+        }
+      }
     })();
 }, []);
 
@@ -138,24 +130,25 @@ useEffect(() => {
 
 const  handleCreateRide = async () => {
     setRideCreated(true);
-   
+   if(!user || !source) {
+     return;
+   }
     const ride :Ride =
     {
-        driverId :user?.id,
-        origin: {
-          address:source?.place_id,
-          lat: routeCoords[0].latitude,
-          lng :routeCoords[0].longitude,
+        userId :user.id,
+        userType:user?.userType,
+        sourceLocation: {
+          placeId:source.place_id,
+          coordinates:[ routeCoords[0]]
         },
-        destination: {
-          address:destination?.place_id,
-          lat: routeCoords[routeCoords.length-1].latitude,
-          lng :routeCoords[routeCoords.length-1].longitude,
+        destinationLocation: {
+          placeId:source.place_id,
+          coordinates:[routeCoords[routeCoords.length-1]]
         },
-        startDate : selectedDay === 'today' ? new Date() : new Date(),
-        startTime : startTime,
+        waypoints:[],
+        date : selectedDay === 'today' ? new Date() : new Date(),
         seatsAvailable : selectedSeats || 1,
-        pricePerSeat :50.0,
+        price :50.0,
         isRecurring:true,
         recurringPattern:'mon,tue,wed,thu,fri',
         isActive:true
@@ -247,7 +240,9 @@ useEffect(() => {
   }
 }, [routeCoords]);
 
-
+useEffect(()=> {
+ 
+})
 
 return (
     <SafeAreaView style={appStyles.mainContainer}>
@@ -300,20 +295,20 @@ return (
     
     
   )}
-  {selectedRide && selectedRide.startCoords && routeCoords.length>0 && (
+  {selectedRide && selectedRide.sourceLocation?.coordinates && routeCoords.length>0 && (
   <>
     {/* Line: Your Source to Rider's Source */}
     <Polyline
-      coordinates={[routeCoords[0], selectedRide.startCoords]}
+      coordinates={[routeCoords[0], selectedRide.sourceLocation.coordinates[0]]}
       strokeColor="orange"
       strokeWidth={3}
       lineDashPattern={[5, 5]}
     />
 
     {/* Line: Your Destination to Rider's Destination */}
-    {selectedRide &&  selectedRide.endCoords &&  routeCoords.length>0  && selectedRide.endCoords && (
+    {selectedRide &&  selectedRide.destinationLocation &&  routeCoords.length>0  && selectedRide.destinationLocation.coordinates && (
       <Polyline
-        coordinates={[routeCoords[routeCoords.length-1], selectedRide.endCoords]}
+        coordinates={[routeCoords[routeCoords.length-1], selectedRide.destinationLocation.coordinates[0]]}
         strokeColor="red"
         strokeWidth={3}
         lineDashPattern={[5, 5]}
