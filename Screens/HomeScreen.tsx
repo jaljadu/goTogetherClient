@@ -102,10 +102,10 @@ useEffect(() => {
             ridedata.sourceLocation?.coordinates.length>0  
            && ridedata.destinationLocation?.coordinates
         ) {
-          const sourcedes=await reverseGeocode(ridedata?.sourceLocation?.coordinates[0].latitude,
-            ridedata.sourceLocation.coordinates[0].longitude);
-          const Destdes=await reverseGeocode(ridedata?.destinationLocation?.coordinates[0].latitude,
-            ridedata?.destinationLocation?.coordinates[0].longitude);
+          const sourcedes=await reverseGeocode(ridedata?.sourceLocation?.coordinates[0],
+            ridedata.sourceLocation.coordinates[1]);
+          const Destdes=await reverseGeocode(ridedata?.destinationLocation?.coordinates[0],
+            ridedata?.destinationLocation?.coordinates[1]);
         
          setSource({
           description:sourcedes,
@@ -139,11 +139,13 @@ const  handleCreateRide = async () => {
         userType:user?.userType,
         sourceLocation: {
           placeId:source.place_id,
-          coordinates:[ routeCoords[0]]
+          type: "Point",
+          coordinates:[ routeCoords[0].longitude,routeCoords[0].latitude]
         },
         destinationLocation: {
+          type: "Point",
           placeId:source.place_id,
-          coordinates:[routeCoords[routeCoords.length-1]]
+          coordinates:[routeCoords[routeCoords.length-1].longitude,routeCoords[routeCoords.length-1].latitude]
         },
         waypoints:[],
         date : selectedDay === 'today' ? new Date() : new Date(),
@@ -299,7 +301,11 @@ return (
   <>
     {/* Line: Your Source to Rider's Source */}
     <Polyline
-      coordinates={[routeCoords[0], selectedRide.sourceLocation.coordinates[0]]}
+      coordinates={[routeCoords[0],
+        {
+          latitude: selectedRide.sourceLocation.coordinates[0] as number,
+          longitude: selectedRide.sourceLocation.coordinates[1] as number
+        }]}
       strokeColor="orange"
       strokeWidth={3}
       lineDashPattern={[5, 5]}
@@ -308,7 +314,10 @@ return (
     {/* Line: Your Destination to Rider's Destination */}
     {selectedRide &&  selectedRide.destinationLocation &&  routeCoords.length>0  && selectedRide.destinationLocation.coordinates && (
       <Polyline
-        coordinates={[routeCoords[routeCoords.length-1], selectedRide.destinationLocation.coordinates[0]]}
+        coordinates={[routeCoords[routeCoords.length-1], {
+          latitude: selectedRide.destinationLocation.coordinates[0] as number,
+          longitude: selectedRide.destinationLocation.coordinates[1] as number
+        }]}
         strokeColor="red"
         strokeWidth={3}
         lineDashPattern={[5, 5]}
@@ -317,7 +326,7 @@ return (
   </>
 )}
         </MapView>
-        <TouchableOpacity style={appStyles.floatingPlusButton} onPress={() => console.log('Plus pressed')}>
+        <TouchableOpacity style={appStyles.floatingPlusButton} onPress={() => setRideCreated(false)}>
   <FontAwesome name="plus" size={20} color="#fff" />
 </TouchableOpacity>
         </View>

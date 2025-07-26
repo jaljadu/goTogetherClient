@@ -2,6 +2,7 @@ import { LatLng } from "react-native-maps";
 
 export interface geoPoint {
  
-  coordinates: LatLng[],
-  placeId: String
+  coordinates: Number[],
+  placeId: String,
+  type: string ,
 }
