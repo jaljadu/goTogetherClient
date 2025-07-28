@@ -1,13 +1,11 @@
 // screens/RegisterScreen.tsx
 import React, { useState,useEffect } from 'react';
-import { View, Text, TextInput, Button, Switch, StyleSheet,Image,ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, Switch, StyleSheet,Image,ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { appStyles } from '../styles/appStyles';
-import MapView from 'react-native-maps';
 import GoogleSignIn from './GoogleSignIn';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { api } from './api';
@@ -44,7 +42,9 @@ export default function RegisterScreen( ) {
     const checkIfLoggedIn = async () => {
       try {
         
-        const userInfo = await GoogleSignin.signInSilently();
+        if (Platform.OS !== 'web') {
+          const userInfo = await GoogleSignin.signInSilently();
+        
 
          //if (isSignedIn) {
          // const userInfo = await GoogleSignin.signInSilently();
@@ -78,6 +78,7 @@ export default function RegisterScreen( ) {
             navigation.navigate("MainTabs" as any);
         }
         }
+      }
         //} //else {
           //setLoading(false); // Not signed in, show Register screen
         //}
@@ -90,6 +91,10 @@ export default function RegisterScreen( ) {
     checkIfLoggedIn();
   }, []);
 
+  function handleCreateRide(): void {
+    navigation.navigate("MainTabs" as any);
+  }
+
   return (
     <View style={styles.container}>
       <Image
@@ -98,6 +103,9 @@ export default function RegisterScreen( ) {
         resizeMode="contain"
       />
       <GoogleSignIn />
+      <TouchableOpacity style={appStyles.createBtn} onPress={handleCreateRide}>
+      <Text style={appStyles.btnText}>+ Create Ride</Text>
+    </TouchableOpacity>
     </View>
   );
   

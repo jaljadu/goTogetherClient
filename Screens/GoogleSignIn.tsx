@@ -25,6 +25,7 @@ const redirectUri = AuthSession.makeRedirectUri({
   path :'https://auth.expo.io/jaljadu/goTogetherClient' // ✅ This is valid here
 });
   const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: '657032691252-6d3uvir16pu0k46lvbv5u481qi02aafl.apps.googleusercontent.com',
   androidClientId: '657032691252-6d3uvir16pu0k46lvbv5u481qi02aafl.apps.googleusercontent.com',
   iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
   redirectUri:redirectUri,

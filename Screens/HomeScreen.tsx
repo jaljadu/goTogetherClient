@@ -1,7 +1,7 @@
 // screens/HomeScreen.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import MapView, { LatLng, Marker ,Polyline,PROVIDER_GOOGLE} from 'react-native-maps';
+
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +23,7 @@ import CustomDropdown from './CustomDropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from './api';
 import { Ride } from './Ride';
+import UniversalMap from './UniversalMap';
 export default function HomeScreen() {
 type HomeRouteProp = RouteProp<MainTabParamList, 'Home'>;
 const route = useRoute<HomeRouteProp>();
@@ -71,7 +72,7 @@ const [selectedOwner, setSelectedOwner] = useState<string | number | null>(null)
 const [openOwner, setOpenOwner] = useState<boolean>(false);
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'LocationSearch'>;
 const navigation = useNavigation<NavigationProp>();
-const mapRef = useRef<MapView>(null); // 👈 Map reference
+
 
 const { setSource, setDestination } = useLocationContext();
 const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
@@ -94,7 +95,7 @@ useEffect(() => {
       else {
         setSelectedSeats(3);
       }
-      const ride= await axios.get(api.Baseurl + 'rides');
+      const ride= await axios.get(api.Baseurl + 'rides/'+'68763a5e998e10471d06f9a8');
       if(ride && ride.data) {
          const ridedata=ride.data[0] as Ride ;
          console.log(ridedata);
@@ -184,7 +185,7 @@ const getLatLngFromPlaceId = async (placeId: string): Promise<{ lat: number; lng
 const reverseGeocode = async (lat: Number, lng: Number): Promise<string> => {
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}`
+      `${api.Baseurl}locationsearch/reverseGeocode?lat=${lng}&lng=${lat}`
     );
     const json = await response.json();
 
@@ -212,7 +213,7 @@ const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
 const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => {
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=place_id:${sourcePlaceId}&destination=place_id:${destinationPlaceId}&key=${GOOGLE_MAPS_API_KEY}`
+      `${api.Baseurl}locationsearch/getDirectionByPlace?origin=place_id:${sourcePlaceId}&destination=place_id:${destinationPlaceId}`      
     );
     const json = await response.json();
     const points = polyline.decode(json.routes[0].overview_polyline.points);
@@ -228,19 +229,7 @@ const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => 
   }
 };
 
-useEffect(() => {
-  if (routeCoords.length > 0 && mapRef.current) {
-    mapRef.current.fitToCoordinates(routeCoords, {
-      edgePadding: {
-        top: 100,
-        right: 100,
-        bottom: 100,
-        left: 100,
-      },
-      animated: true,
-    });
-  }
-}, [routeCoords]);
+
 
 useEffect(()=> {
  
@@ -252,80 +241,14 @@ return (
       {/* Map */}
       {location && (
         <View  style={appStyles.mapContanier}>
-        <MapView  style={{ flex: 1 }} ref={mapRef}
-          provider={PROVIDER_GOOGLE}
-          showsTraffic={false}
-          initialRegion={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }}
-        >
-
-      {routeCoords.length==0 &&     
-        <Marker
-              coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-              title="You are here"
-        />
-      }
-         
-  {source?.place_id && routeCoords.length>0 && (
-    <Marker
-      coordinate={routeCoords[0]}
-      title="Start"
-      pinColor="green"
-    />
-  )}
-
+      <UniversalMap
+  location={location}
  
-  {destination?.place_id && routeCoords.length>0 &&  (
-    <Marker
-      coordinate={routeCoords[routeCoords.length-1]}
-      title="Destination"
-      pinColor="red"
-    />
-  )}
-
-  {routeCoords.length > 0 && (
-          
-    <Polyline
-      coordinates={routeCoords}
-      strokeWidth={6}
-      strokeColor="#2336f0"
-    />
-    
-    
-  )}
-  {selectedRide && selectedRide.sourceLocation?.coordinates && routeCoords.length>0 && (
-  <>
-    {/* Line: Your Source to Rider's Source */}
-    <Polyline
-      coordinates={[routeCoords[0],
-        {
-          latitude: selectedRide.sourceLocation.coordinates[0] as number,
-          longitude: selectedRide.sourceLocation.coordinates[1] as number
-        }]}
-      strokeColor="orange"
-      strokeWidth={3}
-      lineDashPattern={[5, 5]}
-    />
-
-    {/* Line: Your Destination to Rider's Destination */}
-    {selectedRide &&  selectedRide.destinationLocation &&  routeCoords.length>0  && selectedRide.destinationLocation.coordinates && (
-      <Polyline
-        coordinates={[routeCoords[routeCoords.length-1], {
-          latitude: selectedRide.destinationLocation.coordinates[0] as number,
-          longitude: selectedRide.destinationLocation.coordinates[1] as number
-        }]}
-        strokeColor="red"
-        strokeWidth={3}
-        lineDashPattern={[5, 5]}
-      />
-    )}
-  </>
-)}
-        </MapView>
+  routeCoords={routeCoords}
+  source={source}
+  destination={destination}
+  selectedRide={selectedRide}
+/>
         <TouchableOpacity style={appStyles.floatingPlusButton} onPress={() => setRideCreated(false)}>
   <FontAwesome name="plus" size={20} color="#fff" />
 </TouchableOpacity>

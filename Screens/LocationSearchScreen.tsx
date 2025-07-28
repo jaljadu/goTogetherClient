@@ -11,6 +11,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from './types'; // make sure the path is correct
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useLocationContext } from './LocationContext';
+import { api } from './api';
 
 type LocationSearchRouteProp = RouteProp<RootStackParamList, 'LocationSearch'>;
 type LocationSearchNavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -35,9 +36,10 @@ export default function LocationSearchScreen() {
     }
 
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en`
-      );
+     // const res = await fetch(
+      //  `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en`
+      //);
+      const res=await fetch(api.Baseurl +'locationsearch?input=' +text)
       const json = await res.json();
       if (json.predictions) {
         setResults(json.predictions);
