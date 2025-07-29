@@ -12,30 +12,14 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { appStyles } from '../styles/appStyles';
 const CARD_HEIGHT = 210;
 
-
-
-type Rider = {
-  name: string;
-  start: string;
-  end: string;
-  time: string;
-  price: number;
-  photo?: string;
-  rating?:number;
-  reviews?:string;
-  startCoords: any,  // example
-  endCoords: any,
-
-};
-
 type Props = {
-  data: Rider[];
-  onCardChange: (rider: Rider) => void;
+  data: any[];
+  onCardChange: (rider: any) => void;
 };
 
 export const CardCarousel: React.FC<Props> = ({ data, onCardChange }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const flatListRef = useRef<FlatList<Rider>>(null);
+  const flatListRef = useRef<FlatList<any>>(null);
 
   const scrollToIndex = (index: number) => {
     if (index >= 0 && index < data.length) {
@@ -75,10 +59,10 @@ export const CardCarousel: React.FC<Props> = ({ data, onCardChange }) => {
         renderItem={({ item, index }) => (
          <View style={[appStyles.matchCard]}>
             <View style={appStyles.cardHeader}>
-                <Image source={{ uri: item.photo }} style={appStyles.avatarLarge} />
+                <Image source={{ uri: item?.userInfo?.imageUrl }} style={appStyles.avatarLarge} />
                 <View style={appStyles.cardHeaderText}>
-                <Text style={appStyles.name}>{item.name}</Text>
-                <Text style={appStyles.rating}>⭐ {item.rating} ({item.reviews})</Text>
+                <Text style={appStyles.name}>{item?.userInfo?.name}</Text>
+                <Text style={appStyles.rating}>⭐⭐⭐⭐⭐ </Text>
                 </View>
                 <Text style={appStyles.timeAgo}>an hour ago</Text>
             </View>
@@ -91,20 +75,20 @@ export const CardCarousel: React.FC<Props> = ({ data, onCardChange }) => {
         </View>
         <View style={{ flex: 1 }}>
             <Text style={appStyles.locationLabel}>Start</Text>
-            <Text numberOfLines={1} style={appStyles.addressText}>{item.start}</Text>
+            <Text numberOfLines={1} style={appStyles.addressText}>{item?.sourceLocation}</Text>
             <Text style={[appStyles.locationLabel, { marginTop: 2 }]}>End</Text>
-            <Text numberOfLines={1} style={appStyles.addressText}>{item.end}</Text>
+            <Text numberOfLines={1} style={appStyles.addressText}>{item?.destinationLocation}</Text>
         </View>
   </View>
 
   <View style={appStyles.metaRow}>
-    <Text style={appStyles.timeText}>{item.time} <Text style={appStyles.subduedText}>Tomorrow</Text></Text>
+    <Text style={appStyles.timeText}>{item?.date} <Text style={appStyles.subduedText}>Tomorrow</Text></Text>
     <Text style={appStyles.subduedText}>1 Seat Required</Text>
   </View>
 
   <TouchableOpacity style={appStyles.offerRideButton}>
   <View style={appStyles.offerRowContent}>
-    <Text style={appStyles.offerPriceInside}>₹ {item.price}</Text>
+    <Text style={appStyles.offerPriceInside}>₹ {item?.price}</Text>
 
     <View style={appStyles.offerTextWrapper}>
       <Text style={appStyles.offerRideText}>Offer ride</Text>

@@ -36,32 +36,34 @@ const [rideCreated, setRideCreated] = useState(false);
 const Stack = createNativeStackNavigator<RootStackParamList>();  
 const { source, destination } = useLocationContext();
  const { user } = useUser();
-const [matchedRiders, setMatchedRiders] = useState([
-  {
-    name: 'Arjun',
-    time: '8:00 AM',
-    start: 'Salt Lake, Sector V',
-    end: 'Howrah Maidan',
-    price: 50,
-    photo: 'https://randomuser.me/api/portraits/men/75.jpg',
-    rating:5,
-    reviews:"s",
-    startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
-    endCoords: { latitude: 22.5200, longitude: 88.3700 },
-  },
-  {
-    name: 'Sita',
-    time: '8:15 AM',
-    start: 'Behala',
-    end: 'Ballygunge',
-    price: 60,
-    photo: 'https://randomuser.me/api/portraits/women/65.jpg',
-    rating:5,
-    reviews:"s",
-    startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
-     endCoords: { latitude: 22.6200, longitude: 88.3700 },
-  }
-]);
+//const [matchedRiders, setMatchedRiders] = useState([
+  //{
+   // name: 'Arjun',
+   // time: '8:00 AM',
+   // start: 'Salt Lake, Sector V',
+   // end: 'Howrah Maidan',
+   // price: 50,
+   // photo: 'https://randomuser.me/api/portraits/men/75.jpg',
+   // rating:5,
+   // reviews:"s",
+   // startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
+   // endCoords: { latitude: 22.5200, longitude: 88.3700 },
+  //},
+  //{
+   // name: 'Sita',
+   // time: '8:15 AM',
+    //start: 'Behala',
+    //end: 'Ballygunge',
+    //price: 60,
+    //photo: 'https://randomuser.me/api/portraits/women/65.jpg',
+    //rating:5,
+    //reviews:"s",
+    //startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
+     //endCoords: { latitude: 22.6200, longitude: 88.3700 },
+  //}
+//]);
+
+const [matchedRiders, setMatchedRiders] = useState([]);
 
 const [selectedSeats, setSelectedSeats] = useState<string | number | null>(null);
 const [openSeat, setOpenSeat] = useState<boolean>(false);
@@ -94,10 +96,14 @@ useEffect(() => {
       else {
         setSelectedSeats(3);
       }
-      const ride= await axios.get(api.Baseurl + 'rides');
+     
+      var url=api.Baseurl + 'rides/getRideById?userid='+ user?.id;
+    
+      const ride= await axios.get(url);
+     
       if(ride && ride.data) {
          const ridedata=ride.data[0] as Ride ;
-         console.log(ridedata);
+       
          if(ridedata && ridedata.sourceLocation?.coordinates && 
             ridedata.sourceLocation?.coordinates.length>0  
            && ridedata.destinationLocation?.coordinates
@@ -116,6 +122,8 @@ useEffect(() => {
           place_id:ridedata?.destinationLocation?.placeId ||''
          });
         }
+        setRideCreated(true);
+        await fetchAllRides();
       }
     })();
 }, []);
@@ -130,7 +138,7 @@ useEffect(() => {
 
 const  handleCreateRide = async () => {
     setRideCreated(true);
-   if(!user || !source) {
+   if(!user || !source || !destination) {
      return;
    }
     const ride :Ride =
@@ -140,12 +148,12 @@ const  handleCreateRide = async () => {
         sourceLocation: {
           placeId:source.place_id,
           type: "Point",
-          coordinates:[ routeCoords[0].longitude,routeCoords[0].latitude]
+          coordinates:[ routeCoords[0].latitude,routeCoords[0].longitude]
         },
         destinationLocation: {
           type: "Point",
-          placeId:source.place_id,
-          coordinates:[routeCoords[routeCoords.length-1].longitude,routeCoords[routeCoords.length-1].latitude]
+          placeId:destination.place_id,
+          coordinates:[routeCoords[routeCoords.length-1].latitude,routeCoords[routeCoords.length-1].longitude]
         },
         waypoints:[],
         date : selectedDay === 'today' ? new Date() : new Date(),
@@ -165,8 +173,7 @@ const fetchRouteAndUpdateMap = (rider:any) => {
   if(routeCoords.length>0) {
 const sourceGap = haversine(routeCoords[0], rider.startCoords) / 1000;
    const destGap = haversine(routeCoords[routeCoords.length-1], rider.endCoords) / 1000;
-   console.log(`Source gap: ${sourceGap.toFixed(2)} km`);
-console.log(`Destination gap: ${destGap.toFixed(2)} km`);
+  
   }
   
 };
@@ -216,12 +223,12 @@ const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => 
     );
     const json = await response.json();
     const points = polyline.decode(json.routes[0].overview_polyline.points);
-
+    
     const coords = points.map(([lat, lng]) => ({
       latitude: lat,
       longitude: lng,
     }));
-
+   
     setRouteCoords(coords);
   } catch (err) {
     console.error('Route fetch failed:', err);
@@ -242,9 +249,23 @@ useEffect(() => {
   }
 }, [routeCoords]);
 
-useEffect(()=> {
- 
-})
+const fetchAllRides= async ()=> {
+  try {
+    if(rideCreated){
+      const url=`${api.Baseurl}rides/getAllRides?id=${user?.id}`
+      console.log(url);
+      const response=await fetch(url);
+      const json = await response.json();
+      console.log(json);
+      setMatchedRiders(json);
+      //if(json.length>0)
+       // setSelectedRide(json[0]);
+  }
+  }
+  catch(err){
+    console.log(err);
+  }
+}
 
 return (
     <SafeAreaView style={appStyles.mainContainer}>
