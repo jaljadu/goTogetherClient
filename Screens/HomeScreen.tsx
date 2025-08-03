@@ -22,7 +22,7 @@ import { useLocationContext } from './LocationContext';
 import CustomDropdown from './CustomDropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from './api';
-import { Ride } from './Ride';
+import { MatchRider, Ride } from './Ride';
 export default function HomeScreen() {
 type HomeRouteProp = RouteProp<MainTabParamList, 'Home'>;
 const route = useRoute<HomeRouteProp>();
@@ -63,7 +63,7 @@ const { source, destination } = useLocationContext();
   //}
 //]);
 
-const [matchedRiders, setMatchedRiders] = useState([]);
+const [matchedRiders, setMatchedRiders] = useState<MatchRider[]>([]);
 
 const [selectedSeats, setSelectedSeats] = useState<string | number | null>(null);
 const [openSeat, setOpenSeat] = useState<boolean>(false);
@@ -147,12 +147,14 @@ const  handleCreateRide = async () => {
         userType:user?.userType,
         sourceLocation: {
           placeId:source.place_id,
+          description:source.description,
           type: "Point",
           coordinates:[ routeCoords[0].latitude,routeCoords[0].longitude]
         },
         destinationLocation: {
           type: "Point",
           placeId:destination.place_id,
+           description: destination.description,
           coordinates:[routeCoords[routeCoords.length-1].latitude,routeCoords[routeCoords.length-1].longitude]
         },
         waypoints:[],
@@ -167,12 +169,14 @@ const  handleCreateRide = async () => {
     
 };
 
-const fetchRouteAndUpdateMap = (rider:any) => {
+const fetchRouteAndUpdateMap = (rider:MatchRider) => {
   
   setSelectedRide(rider);
   if(routeCoords.length>0) {
-const sourceGap = haversine(routeCoords[0], rider.startCoords) / 1000;
-   const destGap = haversine(routeCoords[routeCoords.length-1], rider.endCoords) / 1000;
+const sourceGap = haversine(routeCoords[0],[ rider.sourceLocation.coordinates[0] as number,
+  rider.sourceLocation.coordinates[1] as number]) / 1000;
+   const destGap = haversine(routeCoords[routeCoords.length-1], 
+    [rider.destinationLocation.coordinates[0] as number,rider.destinationLocation.coordinates[1] as number  ]) / 1000;
   
   }
   
@@ -251,16 +255,27 @@ useEffect(() => {
 
 const fetchAllRides= async ()=> {
   try {
-    if(rideCreated){
+    console.log('te');
+    //if(rideCreated){
       const url=`${api.Baseurl}rides/getAllRides?id=${user?.id}`
       console.log(url);
       const response=await fetch(url);
-      const json = await response.json();
+      const json = await response.json() as MatchRider[];
+      if(json.length>0) {
+        json.forEach((element:MatchRider)  => {
+        //  element.sourceLocation.placeId
+        });
+      }
       console.log(json);
       setMatchedRiders(json);
-      //if(json.length>0)
-       // setSelectedRide(json[0]);
-  }
+      if(json.length>0){
+          setSelectedRide(json[0]);
+          var tt=new Date(json[0].date).toLocaleTimeString();
+          console.log(tt);
+          await fetchRouteAndUpdateMap(json[0]);
+      }
+        
+ // }
   }
   catch(err){
     console.log(err);

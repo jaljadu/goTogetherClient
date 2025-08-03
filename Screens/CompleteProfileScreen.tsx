@@ -82,7 +82,8 @@ useEffect(() => {
   const handleRegister = async () => {
     // Send user info to server
     console.log(route);
-
+     setImage(route?.params?.userInfo?.data?.user?.photo);
+     console.log(imageUrl);
     const profile = {
       name: route.params.userInfo.data.user.name,
       email: route.params.userInfo.data.user.email,

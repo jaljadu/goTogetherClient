@@ -66,7 +66,7 @@ export default function RegisterScreen( ) {
           const userData = response.data;
           console.log(userData);
         
-        if(userData) {
+        if(userData &&  userData._id) {
           setUser({
             id: userData._id,
             name: userData.name,

@@ -10,16 +10,18 @@ import {
 } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { appStyles } from '../styles/appStyles';
+import { MatchRider } from './Ride';
+import DateLabel from './DateLabel';
 const CARD_HEIGHT = 210;
 
 type Props = {
-  data: any[];
+  data: MatchRider[];
   onCardChange: (rider: any) => void;
 };
 
-export const CardCarousel: React.FC<Props> = ({ data, onCardChange }) => {
+export const CardCarousel: React.FC<Props> = ({ data , onCardChange }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const flatListRef = useRef<FlatList<any>>(null);
+  const flatListRef = useRef<FlatList<MatchRider>>(null);
 
   const scrollToIndex = (index: number) => {
     if (index >= 0 && index < data.length) {
@@ -33,6 +35,7 @@ export const CardCarousel: React.FC<Props> = ({ data, onCardChange }) => {
       onCardChange(data[selectedIndex]);
     }
   }, [selectedIndex]);
+
 
   return (
     <View style={appStyles.wrapper}>
@@ -75,20 +78,26 @@ export const CardCarousel: React.FC<Props> = ({ data, onCardChange }) => {
         </View>
         <View style={{ flex: 1 }}>
             <Text style={appStyles.locationLabel}>Start</Text>
-            <Text numberOfLines={1} style={appStyles.addressText}>{item?.sourceLocation}</Text>
+            <Text numberOfLines={1} style={appStyles.addressText}>{item?.sourceLocation.description}</Text>
             <Text style={[appStyles.locationLabel, { marginTop: 2 }]}>End</Text>
-            <Text numberOfLines={1} style={appStyles.addressText}>{item?.destinationLocation}</Text>
+            <Text numberOfLines={1} style={appStyles.addressText}>{item?.destinationLocation.description}</Text>
         </View>
   </View>
 
   <View style={appStyles.metaRow}>
-    <Text style={appStyles.timeText}>{item?.date} <Text style={appStyles.subduedText}>Tomorrow</Text></Text>
+    <Text style={appStyles.timeText}>{new Date(item?.date).toLocaleTimeString([],{
+       hour: '2-digit',
+       minute: '2-digit',
+       hour12: true, 
+    })} 
+        <DateLabel dateString={item?.date}></DateLabel>
+    </Text>
     <Text style={appStyles.subduedText}>1 Seat Required</Text>
   </View>
 
   <TouchableOpacity style={appStyles.offerRideButton}>
   <View style={appStyles.offerRowContent}>
-    <Text style={appStyles.offerPriceInside}>₹ {item?.price}</Text>
+    <Text style={appStyles.offerPriceInside}>₹ {item?.price?.toString()}</Text>
 
     <View style={appStyles.offerTextWrapper}>
       <Text style={appStyles.offerRideText}>Offer ride</Text>
