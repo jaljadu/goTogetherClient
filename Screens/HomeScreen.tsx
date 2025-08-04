@@ -194,9 +194,8 @@ const getLatLngFromPlaceId = async (placeId: string): Promise<{ lat: number; lng
 
 const reverseGeocode = async (lat: Number, lng: Number): Promise<string> => {
   try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}`
-    );
+    const url =`${api.Baseurl}locationsearch/reverseGeocode?lat=${lat}&lng=${lng}`
+    const response = await fetch(url);
     const json = await response.json();
 
     if (json.status === 'OK' && json.results.length > 0) {
@@ -222,9 +221,9 @@ const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
 
 const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => {
   try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=place_id:${sourcePlaceId}&destination=place_id:${destinationPlaceId}&key=${GOOGLE_MAPS_API_KEY}`
-    );
+     var url=`${api.Baseurl}locationsearch/getDirectionByPlace?sourcePlaceId=${sourcePlaceId}&destinationPlaceId=${destinationPlaceId}`;
+    //var url=`${api.Baseurl}locationsearch/getDirectionByPlace?https://maps.googleapis.com/maps/api/directions/json?origin=place_id:${sourcePlaceId}&destination=place_id:${destinationPlaceId}&key=${GOOGLE_MAPS_API_KEY}`;
+    const response = await fetch(url);
     const json = await response.json();
     const points = polyline.decode(json.routes[0].overview_polyline.points);
     
