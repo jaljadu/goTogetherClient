@@ -14,9 +14,9 @@ type Location = {
 type Props = {
   location: Location;
   routeCoords: LatLng[];
-  source?: LocationType;
-  destination?: LocationType;
-  selectedRide?: MatchRider;
+  source?: LocationType |null;
+  destination?: LocationType |null;
+  selectedRide?: MatchRider |null;
   mapRef?: RefObject<MapView>;
 };
 
