@@ -23,6 +23,7 @@ import CustomDropdown from './CustomDropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from './api';
 import { MatchRider, Ride } from './Ride';
+import MobileMap from './MobileMap';
 export default function HomeScreen() {
 type HomeRouteProp = RouteProp<MainTabParamList, 'Home'>;
 const route = useRoute<HomeRouteProp>();
@@ -287,83 +288,83 @@ return (
       {/* Map */}
       {location && (
         <View  style={appStyles.mapContanier}>
-        <MapView  style={{ flex: 1 }} ref={mapRef}
-          provider={PROVIDER_GOOGLE}
-          showsTraffic={false}
-          initialRegion={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }}
-        >
+          <MobileMap location={location} routeCoords={routeCoords} source={source} destination={destination}   style={{ flex: 1 }} ref={mapRef}
+            provider={PROVIDER_GOOGLE}
+            showsTraffic={false}
+            initialRegion={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+              latitudeDelta: 0.1,
+              longitudeDelta: 0.1,
+            }}
+          >
 
-      {routeCoords.length==0 &&     
-        <Marker
-              coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-              title="You are here"
-        />
-      }
-         
-  {source?.place_id && routeCoords.length>0 && (
-    <Marker
-      coordinate={routeCoords[0]}
-      title="Start"
-      pinColor="green"
-    />
-  )}
-
- 
-  {destination?.place_id && routeCoords.length>0 &&  (
-    <Marker
-      coordinate={routeCoords[routeCoords.length-1]}
-      title="Destination"
-      pinColor="red"
-    />
-  )}
-
-  {routeCoords.length > 0 && (
+        {routeCoords.length==0 &&     
+          <Marker
+                coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+                title="You are here"
+          />
+        }
           
-    <Polyline
-      coordinates={routeCoords}
-      strokeWidth={6}
-      strokeColor="#2336f0"
-    />
-    
-    
-  )}
-  {selectedRide && selectedRide.sourceLocation?.coordinates && routeCoords.length>0 && (
-  <>
-    {/* Line: Your Source to Rider's Source */}
-    <Polyline
-      coordinates={[routeCoords[0],
-        {
-          latitude: selectedRide.sourceLocation.coordinates[0] as number,
-          longitude: selectedRide.sourceLocation.coordinates[1] as number
-        }]}
-      strokeColor="orange"
-      strokeWidth={3}
-      lineDashPattern={[5, 5]}
-    />
+    {source?.place_id && routeCoords.length>0 && (
+      <Marker
+        coordinate={routeCoords[0]}
+        title="Start"
+        pinColor="green"
+      />
+    )}
 
-    {/* Line: Your Destination to Rider's Destination */}
-    {selectedRide &&  selectedRide.destinationLocation &&  routeCoords.length>0  && selectedRide.destinationLocation.coordinates && (
+  
+    {destination?.place_id && routeCoords.length>0 &&  (
+      <Marker
+        coordinate={routeCoords[routeCoords.length-1]}
+        title="Destination"
+        pinColor="red"
+      />
+    )}
+
+    {routeCoords.length > 0 && (
+            
       <Polyline
-        coordinates={[routeCoords[routeCoords.length-1], {
-          latitude: selectedRide.destinationLocation.coordinates[0] as number,
-          longitude: selectedRide.destinationLocation.coordinates[1] as number
-        }]}
-        strokeColor="red"
+        coordinates={routeCoords}
+        strokeWidth={6}
+        strokeColor="#2336f0"
+      />
+      
+      
+    )}
+    {selectedRide && selectedRide.sourceLocation?.coordinates && routeCoords.length>0 && (
+    <>
+      {/* Line: Your Source to Rider's Source */}
+      <Polyline
+        coordinates={[routeCoords[0],
+          {
+            latitude: selectedRide.sourceLocation.coordinates[0] as number,
+            longitude: selectedRide.sourceLocation.coordinates[1] as number
+          }]}
+        strokeColor="orange"
         strokeWidth={3}
         lineDashPattern={[5, 5]}
       />
-    )}
-  </>
-)}
-        </MapView>
-        <TouchableOpacity style={appStyles.floatingPlusButton} onPress={() => setRideCreated(false)}>
-  <FontAwesome name="plus" size={20} color="#fff" />
-</TouchableOpacity>
+
+      {/* Line: Your Destination to Rider's Destination */}
+      {selectedRide &&  selectedRide.destinationLocation &&  routeCoords.length>0  && selectedRide.destinationLocation.coordinates && (
+        <Polyline
+          coordinates={[routeCoords[routeCoords.length-1], {
+            latitude: selectedRide.destinationLocation.coordinates[0] as number,
+            longitude: selectedRide.destinationLocation.coordinates[1] as number
+          }]}
+          strokeColor="red"
+          strokeWidth={3}
+          lineDashPattern={[5, 5]}
+        />
+      )}
+    </>
+  )}
+          </MobileMap>
+          <TouchableOpacity style={appStyles.floatingPlusButton} onPress={() => setRideCreated(false)}>
+              <FontAwesome name="plus" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
       )}
 

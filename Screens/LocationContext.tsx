@@ -1,12 +1,12 @@
 // contexts/LocationContext.tsx
 import React, { createContext, useState, useContext } from 'react';
 
-type LocationType = {
+export type LocationType = {
   description: String;
   place_id: String;
 };
 
-type LocationContextType = {
+export type LocationContextType = {
   source: LocationType | null;
   destination: LocationType | null;
   setSource: (s: LocationType) => void;
