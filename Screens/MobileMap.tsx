@@ -6,7 +6,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { appStyles } from '../styles/appStyles'; // adjust path
 import { MatchRider } from './Ride';
 import { LocationType } from './LocationContext';
-
+console.log('LOADED MOIBLE MAP')
 type Location = {
   latitude: number;
   longitude: number;

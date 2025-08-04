@@ -3,7 +3,7 @@ import React from 'react';
 import { GoogleMap, LoadScript, Marker, Polyline } from '@react-google-maps/api';
 import { MatchRider } from './Ride';
 import { LocationType } from './LocationContext';
-
+console.log('LOADED WEB MAP')
 type LatLng = {
   latitude: number;
   longitude: number;

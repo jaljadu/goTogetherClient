@@ -27,6 +27,7 @@ const redirectUri = AuthSession.makeRedirectUri({
   const [request, response, promptAsync] = Google.useAuthRequest({
   androidClientId: '657032691252-6d3uvir16pu0k46lvbv5u481qi02aafl.apps.googleusercontent.com',
   iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+  webClientId: '657032691252-6d3uvir16pu0k46lvbv5u481qi02aafl.apps.googleusercontent.com',
   redirectUri:redirectUri,
    scopes: ['profile', 'email'],
 });

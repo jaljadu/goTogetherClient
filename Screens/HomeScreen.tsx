@@ -1,7 +1,7 @@
 // screens/HomeScreen.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import MapView, { LatLng, Marker ,Polyline,PROVIDER_GOOGLE} from 'react-native-maps';
+
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,8 +23,7 @@ import CustomDropdown from './CustomDropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from './api';
 import { MatchRider, Ride } from './Ride';
-import MobileMap from './MobileMap';
-import WebMap from './WebMap';
+import UniversalMap from './UniversalMap';
 export default function HomeScreen() {
 type HomeRouteProp = RouteProp<MainTabParamList, 'Home'>;
 const route = useRoute<HomeRouteProp>();
@@ -75,7 +74,7 @@ const [selectedOwner, setSelectedOwner] = useState<string | number | null>(null)
 const [openOwner, setOpenOwner] = useState<boolean>(false);
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'LocationSearch'>;
 const navigation = useNavigation<NavigationProp>();
-const mapRef = useRef<MapView>(null); // 👈 Map reference
+const mapRef = useRef<any>(null); // 👈 Map reference
 
 const { setSource, setDestination } = useLocationContext();
 const [selectedRide, setSelectedRide] = useState<MatchRider | null>(null);
@@ -219,7 +218,7 @@ const handleTimeChange = (_: any, selectedDate?: Date) => {
     }
 };
 
-const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
+const [routeCoords, setRouteCoords] = useState<any[]>([]);
 
 const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => {
   try {
@@ -289,23 +288,15 @@ return (
       {/* Map */}
       {location && (
         <View  style={appStyles.mapContanier}>
-         {Platform.OS === 'web' ? (
-    <WebMap
-      location={location}
-      routeCoords={routeCoords}
-      source={source}
-      destination={destination}
-      selectedRide={selectedRide}
-    />
-  ) : (
-    <MobileMap
-      location={location}
-      routeCoords={routeCoords}
-      source={source}
-      destination={destination}
-      selectedRide={selectedRide}     
-    />
-  )}
+          <UniversalMap   
+          location={location}
+          mapRef={mapRef}
+          routeCoords={routeCoords}
+          source={source}
+          destination={destination}
+          selectedRide={selectedRide}>
+
+          </UniversalMap>
           <TouchableOpacity style={appStyles.floatingPlusButton} onPress={() => setRideCreated(false)}>
               <FontAwesome name="plus" size={20} color="#fff" />
           </TouchableOpacity>
