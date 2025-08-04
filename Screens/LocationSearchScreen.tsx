@@ -36,10 +36,9 @@ export default function LocationSearchScreen() {
     }
 
     try {
-     // const res = await fetch(
-      //  `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en`
-      //);
-      const res=await fetch(api.Baseurl +'locationsearch?input=' +text)
+      var url= `${api.Baseurl}locationsearch?input=${text}`;
+      console.log(url);
+      const res = await fetch(url);
       const json = await res.json();
       if (json.predictions) {
         setResults(json.predictions);

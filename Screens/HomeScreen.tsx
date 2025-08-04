@@ -22,8 +22,7 @@ import { useLocationContext } from './LocationContext';
 import CustomDropdown from './CustomDropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from './api';
-import { Ride } from './Ride';
-import UniversalMap from './UniversalMap';
+import { MatchRider, Ride } from './Ride';
 export default function HomeScreen() {
 type HomeRouteProp = RouteProp<MainTabParamList, 'Home'>;
 const route = useRoute<HomeRouteProp>();
@@ -37,32 +36,34 @@ const [rideCreated, setRideCreated] = useState(false);
 const Stack = createNativeStackNavigator<RootStackParamList>();  
 const { source, destination } = useLocationContext();
  const { user } = useUser();
-const [matchedRiders, setMatchedRiders] = useState([
-  {
-    name: 'Arjun',
-    time: '8:00 AM',
-    start: 'Salt Lake, Sector V',
-    end: 'Howrah Maidan',
-    price: 50,
-    photo: 'https://randomuser.me/api/portraits/men/75.jpg',
-    rating:5,
-    reviews:"s",
-    startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
-    endCoords: { latitude: 22.5200, longitude: 88.3700 },
-  },
-  {
-    name: 'Sita',
-    time: '8:15 AM',
-    start: 'Behala',
-    end: 'Ballygunge',
-    price: 60,
-    photo: 'https://randomuser.me/api/portraits/women/65.jpg',
-    rating:5,
-    reviews:"s",
-    startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
-     endCoords: { latitude: 22.6200, longitude: 88.3700 },
-  }
-]);
+//const [matchedRiders, setMatchedRiders] = useState([
+  //{
+   // name: 'Arjun',
+   // time: '8:00 AM',
+   // start: 'Salt Lake, Sector V',
+   // end: 'Howrah Maidan',
+   // price: 50,
+   // photo: 'https://randomuser.me/api/portraits/men/75.jpg',
+   // rating:5,
+   // reviews:"s",
+   // startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
+   // endCoords: { latitude: 22.5200, longitude: 88.3700 },
+  //},
+  //{
+   // name: 'Sita',
+   // time: '8:15 AM',
+    //start: 'Behala',
+    //end: 'Ballygunge',
+    //price: 60,
+    //photo: 'https://randomuser.me/api/portraits/women/65.jpg',
+    //rating:5,
+    //reviews:"s",
+    //startCoords: { latitude: 22.5726, longitude: 88.3639 },  // example
+     //endCoords: { latitude: 22.6200, longitude: 88.3700 },
+  //}
+//]);
+
+const [matchedRiders, setMatchedRiders] = useState<MatchRider[]>([]);
 
 const [selectedSeats, setSelectedSeats] = useState<string | number | null>(null);
 const [openSeat, setOpenSeat] = useState<boolean>(false);
@@ -95,10 +96,14 @@ useEffect(() => {
       else {
         setSelectedSeats(3);
       }
-      const ride= await axios.get(api.Baseurl + 'rides/'+'68763a5e998e10471d06f9a8');
+     
+      var url=api.Baseurl + 'rides/getRideById?userid='+ user?.id;
+    
+      const ride= await axios.get(url);
+     
       if(ride && ride.data) {
          const ridedata=ride.data[0] as Ride ;
-         console.log(ridedata);
+       
          if(ridedata && ridedata.sourceLocation?.coordinates && 
             ridedata.sourceLocation?.coordinates.length>0  
            && ridedata.destinationLocation?.coordinates
@@ -117,6 +122,8 @@ useEffect(() => {
           place_id:ridedata?.destinationLocation?.placeId ||''
          });
         }
+        setRideCreated(true);
+        await fetchAllRides();
       }
     })();
 }, []);
@@ -131,7 +138,7 @@ useEffect(() => {
 
 const  handleCreateRide = async () => {
     setRideCreated(true);
-   if(!user || !source) {
+   if(!user || !source || !destination) {
      return;
    }
     const ride :Ride =
@@ -140,13 +147,15 @@ const  handleCreateRide = async () => {
         userType:user?.userType,
         sourceLocation: {
           placeId:source.place_id,
+          description:source.description,
           type: "Point",
-          coordinates:[ routeCoords[0].longitude,routeCoords[0].latitude]
+          coordinates:[ routeCoords[0].latitude,routeCoords[0].longitude]
         },
         destinationLocation: {
           type: "Point",
-          placeId:source.place_id,
-          coordinates:[routeCoords[routeCoords.length-1].longitude,routeCoords[routeCoords.length-1].latitude]
+          placeId:destination.place_id,
+           description: destination.description,
+          coordinates:[routeCoords[routeCoords.length-1].latitude,routeCoords[routeCoords.length-1].longitude]
         },
         waypoints:[],
         date : selectedDay === 'today' ? new Date() : new Date(),
@@ -160,14 +169,15 @@ const  handleCreateRide = async () => {
     
 };
 
-const fetchRouteAndUpdateMap = (rider:any) => {
+const fetchRouteAndUpdateMap = (rider:MatchRider) => {
   
   setSelectedRide(rider);
   if(routeCoords.length>0) {
-const sourceGap = haversine(routeCoords[0], rider.startCoords) / 1000;
-   const destGap = haversine(routeCoords[routeCoords.length-1], rider.endCoords) / 1000;
-   console.log(`Source gap: ${sourceGap.toFixed(2)} km`);
-console.log(`Destination gap: ${destGap.toFixed(2)} km`);
+const sourceGap = haversine(routeCoords[0],[ rider.sourceLocation.coordinates[0] as number,
+  rider.sourceLocation.coordinates[1] as number]) / 1000;
+   const destGap = haversine(routeCoords[routeCoords.length-1], 
+    [rider.destinationLocation.coordinates[0] as number,rider.destinationLocation.coordinates[1] as number  ]) / 1000;
+  
   }
   
 };
@@ -184,9 +194,8 @@ const getLatLngFromPlaceId = async (placeId: string): Promise<{ lat: number; lng
 
 const reverseGeocode = async (lat: Number, lng: Number): Promise<string> => {
   try {
-    const response = await fetch(
-      `${api.Baseurl}locationsearch/reverseGeocode?lat=${lng}&lng=${lat}`
-    );
+    const url =`${api.Baseurl}locationsearch/reverseGeocode?lat=${lat}&lng=${lng}`
+    const response = await fetch(url);
     const json = await response.json();
 
     if (json.status === 'OK' && json.results.length > 0) {
@@ -212,17 +221,17 @@ const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
 
 const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => {
   try {
-    const response = await fetch(
-      `${api.Baseurl}locationsearch/getDirectionByPlace?origin=place_id:${sourcePlaceId}&destination=place_id:${destinationPlaceId}`      
-    );
+     var url=`${api.Baseurl}locationsearch/getDirectionByPlace?sourcePlaceId=${sourcePlaceId}&destinationPlaceId=${destinationPlaceId}`;
+    //var url=`${api.Baseurl}locationsearch/getDirectionByPlace?https://maps.googleapis.com/maps/api/directions/json?origin=place_id:${sourcePlaceId}&destination=place_id:${destinationPlaceId}&key=${GOOGLE_MAPS_API_KEY}`;
+    const response = await fetch(url);
     const json = await response.json();
     const points = polyline.decode(json.routes[0].overview_polyline.points);
-
+    
     const coords = points.map(([lat, lng]) => ({
       latitude: lat,
       longitude: lng,
     }));
-
+   
     setRouteCoords(coords);
   } catch (err) {
     console.error('Route fetch failed:', err);
@@ -231,9 +240,34 @@ const fetchRoute = async (sourcePlaceId: String, destinationPlaceId: String) => 
 
 
 
-useEffect(()=> {
- 
-})
+const fetchAllRides= async ()=> {
+  try {
+    console.log('te');
+    //if(rideCreated){
+      const url=`${api.Baseurl}rides/getAllRides?id=${user?.id}`
+      console.log(url);
+      const response=await fetch(url);
+      const json = await response.json() as MatchRider[];
+      if(json.length>0) {
+        json.forEach((element:MatchRider)  => {
+        //  element.sourceLocation.placeId
+        });
+      }
+      console.log(json);
+      setMatchedRiders(json);
+      if(json.length>0){
+          setSelectedRide(json[0]);
+          var tt=new Date(json[0].date).toLocaleTimeString();
+          console.log(tt);
+          await fetchRouteAndUpdateMap(json[0]);
+      }
+        
+ // }
+  }
+  catch(err){
+    console.log(err);
+  }
+}
 
 return (
     <SafeAreaView style={appStyles.mainContainer}>
