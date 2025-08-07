@@ -26,9 +26,9 @@ export interface UserInfo {
 email:string,
 gender:string,
 phoneNumber:string,
-
 imageUrl:string,
 userType:string,
+lastLogin:Date,
 createdAt:string,
 updatedAt:string
 

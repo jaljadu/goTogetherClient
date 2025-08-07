@@ -21,7 +21,7 @@ const UniversalMap = ({
   const MapComponent =
     Platform.OS === 'web'
       ? require('./WebMap').default
-      : require('./WebMap').default;
+      : require('./MobileMap').default;
 
   return (
     <View style={{ flex: 1 }}>

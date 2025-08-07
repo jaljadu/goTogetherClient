@@ -73,8 +73,10 @@ export default function RegisterScreen( ) {
             photo: userData.photo,
             gender: userData.gender,
             userType: userData.userType,
+            lastLogin:new Date()
          });
-            navigation.navigate("MainTabs" as any);
+         await fetch(`${api.Baseurl}users/updateUser?id=${userData._id}`);
+         navigation.navigate("MainTabs" as any);
         }
         }
         //} //else {

@@ -91,6 +91,7 @@ const redirectUri = AuthSession.makeRedirectUri({
     photo: userData.photo,
     gender: userData.gender,
     userType: userData.userType,
+    lastLogin:userData.lastLogin
   });
   await AsyncStorage.setItem('userToken',idToken as string);
     navigation.navigate('CompleteProfile', {

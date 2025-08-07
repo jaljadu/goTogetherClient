@@ -90,7 +90,8 @@ useEffect(() => {
       gender,
       imageUrl,
       phoneNumber,
-      userType
+      userType,
+      lastLogin:new Date()
     };
    
     try {

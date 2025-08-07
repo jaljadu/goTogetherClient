@@ -8,6 +8,8 @@ export interface User {
   photo?: string;
   gender?: string;
   userType?: 'rider' | 'biker' | 'car_owner';
+  lastLogin?:Date
+  
 }
 
 interface UserContextType {

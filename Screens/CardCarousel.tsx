@@ -12,6 +12,7 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { appStyles } from '../styles/appStyles';
 import { MatchRider } from './Ride';
 import DateLabel from './DateLabel';
+import UserStatus from './UserStatus';
 const CARD_HEIGHT = 210;
 
 type Props = {
@@ -35,7 +36,22 @@ export const CardCarousel: React.FC<Props> = ({ data , onCardChange }) => {
       onCardChange(data[selectedIndex]);
     }
   }, [selectedIndex]);
+ 
+  const getTimeAgo = (lastLogin: Date): string => {
+  const now = new Date();
+  const loginDate = new Date(lastLogin);
+  const diffMs = now.getTime() - loginDate.getTime();
 
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMinutes <= 5) return 'Online';
+  if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes > 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
 
   return (
     <View style={appStyles.wrapper}>
@@ -67,7 +83,8 @@ export const CardCarousel: React.FC<Props> = ({ data , onCardChange }) => {
                 <Text style={appStyles.name}>{item?.userInfo?.name}</Text>
                 <Text style={appStyles.rating}>⭐⭐⭐⭐⭐ </Text>
                 </View>
-                <Text style={appStyles.timeAgo}>an hour ago</Text>
+                
+               <UserStatus lastLogin={item?.userInfo.lastLogin} />
             </View>
 
         <View style={appStyles.routeRow}>
@@ -90,9 +107,9 @@ export const CardCarousel: React.FC<Props> = ({ data , onCardChange }) => {
        minute: '2-digit',
        hour12: true, 
     })} 
-        <DateLabel dateString={item?.date}></DateLabel>
+     <DateLabel dateString={item?.date}></DateLabel>
     </Text>
-    <Text style={appStyles.subduedText}>1 Seat Required</Text>
+    <Text style={appStyles.subduedText}>{item?.seatsAvailable} Seat Required</Text>
   </View>
 
   <TouchableOpacity style={appStyles.offerRideButton}>
@@ -100,7 +117,8 @@ export const CardCarousel: React.FC<Props> = ({ data , onCardChange }) => {
     <Text style={appStyles.offerPriceInside}>₹ {item?.price?.toString()}</Text>
 
     <View style={appStyles.offerTextWrapper}>
-      <Text style={appStyles.offerRideText}>Offer ride</Text>
+      <Text style={appStyles.offerRideText}>{item?.userInfo?.userType==='Rider' ? 
+        'Request':'Offer'} ride</Text>
       <FontAwesome name="handshake-o" size={16} color="#fff" style={appStyles.offerIcon} />
     </View>
   </View>
